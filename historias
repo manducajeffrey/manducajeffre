@@ -1,0 +1,29 @@
+import streamlit as st
+from transformers import pipeline
+from PyPDF2 import PdfReader
+
+# Cargar modelo preentrenado
+model = pipeline("text-classification", model="nombre_del_modelo", tokenizer="nombre_del_tokenizador")
+
+# Interfaz de usuario
+st.title("Auditoría de Historias Clínicas")
+
+uploaded_file = st.file_uploader("Sube un documento PDF", type="pdf")
+
+if uploaded_file:
+    # Leer el PDF
+    reader = PdfReader(uploaded_file)
+    text = " ".join([page.extract_text() for page in reader.pages])
+    
+    # Mostrar el texto extraído
+    st.subheader("Texto extraído")
+    st.text_area("Texto del documento", text, height=300)
+    
+    # Analizar el texto con el modelo
+    st.subheader("Resultados de la auditoría")
+    result = model(text)
+    
+    for res in result:
+        st.write(f"- **Etiqueta:** {res['label']} - **Confianza:** {res['score']:.2f}")
+    
+    st.success("¡Análisis completado!")
